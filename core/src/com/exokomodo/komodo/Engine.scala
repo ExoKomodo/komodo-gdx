@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.{Color, GL20, Texture}
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.exokomodo.komodo.ecs.components.{BaseComponent, ComponentId}
 import com.exokomodo.komodo.ecs.entities.{Entity, EntityId}
-import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, UpdatableSystem}
+import com.exokomodo.komodo.ecs.systems
+import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, UpdatableSystem}
 
 import scala.collection.immutable.HashMap
 
@@ -17,17 +18,18 @@ object Engine {
 class Engine extends ApplicationListener {
   private var _componentStore: HashMap[ComponentId, BaseComponent] = HashMap.empty[ComponentId, BaseComponent]
   private var _entityStore: HashMap[EntityId, Entity] = HashMap.empty[EntityId, Entity]
-  private var _drawSystemStore: List[DrawableSystem] = List.empty[DrawableSystem]
-  private var _updateSystemStore: List[UpdatableSystem] = List.empty[UpdatableSystem]
+  private var _drawSystemStore: HashMap[SystemId, DrawableSystem] = HashMap.empty[EntityId, DrawableSystem]
+  private var _updateSystemStore: HashMap[SystemId, UpdatableSystem] = HashMap.empty[EntityId, UpdatableSystem]
 
   def create(): Unit = {
     Engine.spriteBatch = Some(new SpriteBatch())
 
-    _drawSystemStore.foreach(system => system.initialize())
-    _updateSystemStore.foreach(system => system.initialize())
+    _initialize()
   }
 
   def render(): Unit = {
+    _initialize()
+
     _draw()
     _update(Gdx.graphics.getDeltaTime())
   }
@@ -44,37 +46,19 @@ class Engine extends ApplicationListener {
   def dispose(): Unit = {
   }
 
-  def registerComponent(componentToRegister: BaseComponent): Boolean = {
-    if (_componentStore.contains(componentToRegister.id))
+  def registerComponent(component: BaseComponent): Boolean = {
+    if (_componentStore.contains(component.id))
       false
     else {
-      componentToRegister.parent match {
-        case Some(_) => {
-          _componentStore.foreachEntry((_, component) => {
-            component.parent match {
-              case Some(parent) => {
-                // Try adding all of the entity's component. If the component is already present on a system, it will not add again.
-                // This makes sure that when doing an entity registration check, all available components are in the system.
-                // This allows the systems to dynamically register whole entities to run logic on.
-                if (parent.id == componentToRegister.parent.get.id) {
-                  _drawSystemStore.foreach(system => {
-                    system.registerComponent(component)
-                  })
-                  _updateSystemStore.foreach(system => {
-                    system.registerComponent(component)
-                  })
-                }
-              }
-              case None => ()
-            }
+      component.parent match {
+        case Some(parent) => {
+          _componentStore += (component.id -> component)
+
+          executeOnSystems((_: SystemId, system: systems.System) => {
+            system.registerComponent(component)
+            system.refreshEntityRegistration(parent)
           })
-          _drawSystemStore.foreach(system => {
-            system.registerComponent(componentToRegister)
-          })
-          _updateSystemStore.foreach(system => {
-            system.registerComponent(componentToRegister)
-          })
-          _componentStore += (componentToRegister.id -> componentToRegister)
+
           true
         }
         case None => false
@@ -84,14 +68,70 @@ class Engine extends ApplicationListener {
 
   def registerEntity(entity: Entity): Boolean = {
     _entityStore += (entity.id -> entity)
+
+    executeOnSystems((_: SystemId, system: systems.System) => {
+      system.refreshEntityRegistration(entity)
+    })
     true
   }
 
   def registerSystem[A <: BaseSystem](system: A): Boolean = {
     system match {
-      case drawable: DrawableSystem => _drawSystemStore = drawable :: _drawSystemStore
-      case updatable: UpdatableSystem => _updateSystemStore = updatable :: _updateSystemStore
+      case drawable: DrawableSystem => _drawSystemStore += (drawable.id -> drawable)
+      case updatable: UpdatableSystem => _updateSystemStore += (updatable.id -> updatable)
     }
+    _entityStore.foreachEntry((_, entity) => system.refreshEntityRegistration(entity))
+    true
+  }
+
+  def executeOnSystems(fn: (SystemId, systems.System) => Unit): Unit = {
+    _drawSystemStore.foreachEntry(fn)
+    _updateSystemStore.foreachEntry(fn)
+  }
+
+  def unregisterComponent(componentId: ComponentId): Boolean = {
+    _componentStore.get(componentId) match {
+      case Some(component) => unregisterComponent(component)
+      case None => false
+    }
+  }
+
+  def unregisterComponent(component: BaseComponent): Boolean = {
+    executeOnSystems((_: SystemId, system: systems.System) => {
+      system.unregisterComponent(component)
+      system.refreshEntityRegistration(component.parent.get)
+    })
+    true
+  }
+
+  def unregisterEntity(entityId: EntityId): Boolean = {
+    _entityStore.get(entityId) match {
+      case Some(entity) => unregisterEntity(entity)
+      case None => false
+    }
+  }
+
+  def unregisterEntity(entity: Entity): Boolean = {
+    val components = for ((_, component) <- _componentStore if component.parent.get.id == entity.id) yield component
+    components.foreach(component => unregisterComponent(component))
+    true
+  }
+
+  def unregisterSystem(systemId: SystemId): Boolean = {
+    _drawSystemStore.get(systemId) match {
+      case Some(system) => unregisterSystem(system)
+      case None => {
+        _updateSystemStore.get(systemId) match {
+          case Some(system) => unregisterSystem(system)
+          case None => false
+        }
+      }
+    }
+  }
+
+  def unregisterSystem(system: systems.System): Boolean = {
+    _drawSystemStore -= system.id
+    _updateSystemStore -= system.id
     true
   }
 
@@ -112,10 +152,14 @@ class Engine extends ApplicationListener {
   private def _draw(): Unit = {
     _clearScreen(Color.CYAN)
 
-    _drawSystemStore.foreach(system => system.draw())
+    _drawSystemStore.foreachEntry((_, system) => system.draw())
+  }
+
+  private def _initialize(): Unit = {
+    executeOnSystems((_: SystemId, system: systems.System) => system.initialize())
   }
 
   private def _update(delta: Float): Unit = {
-    _updateSystemStore.foreach(system => system.update(delta))
+    _updateSystemStore.foreachEntry((_, system) => system.update(delta))
   }
 }

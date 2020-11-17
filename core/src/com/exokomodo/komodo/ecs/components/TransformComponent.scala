@@ -19,7 +19,8 @@ object TransformComponent {
   }
 }
 
-class TransformComponent(
+@TypeId(id = "TransformComponent")
+sealed class TransformComponent(
                           override val parent: Option[Entity],
                           var position: Vector3,
                           var rotation: Vector3,

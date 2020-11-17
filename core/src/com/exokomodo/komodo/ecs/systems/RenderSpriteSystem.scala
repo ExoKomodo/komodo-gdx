@@ -15,7 +15,7 @@ object RenderSpriteSystem {
 }
 
 class RenderSpriteSystem extends BaseSystem with DrawableSystem {
-  override protected var _registeredTypes: Set[ComponentTypeId] = Set(
+  override protected final val _registeredTypes = Set(
     getComponentTypeId(classOf[SpriteComponent]),
     getComponentTypeId(classOf[TransformComponent]),
   )
@@ -23,8 +23,8 @@ class RenderSpriteSystem extends BaseSystem with DrawableSystem {
   override def draw(): Unit = {
     Engine.spriteBatch.get.begin()
     _entityToComponents.foreachEntry((_, components) => {
-      val sprite = _findComponentByTypeId(components, classOf[SpriteComponent])
-      val transform = _findComponentByTypeId(components, classOf[TransformComponent])
+      val sprite = _findComponentByClass(components, classOf[SpriteComponent])
+      val transform = _findComponentByClass(components, classOf[TransformComponent])
       (sprite, transform) match {
         case (Some(s), Some(t)) => _drawComponents(s, t)
         case _ => ()

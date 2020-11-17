@@ -22,7 +22,8 @@ object SpriteComponent extends BaseComponent {
   }
 }
 
-class SpriteComponent(
+@TypeId(id = "SpriteComponent")
+sealed class SpriteComponent(
                        override val parent: Option[Entity],
                        val texturePath: Option[String],
                        var texture: Option[Texture],

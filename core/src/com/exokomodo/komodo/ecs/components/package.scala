@@ -7,7 +7,7 @@ package object components {
   private var _nextId: ComponentId = 0
 
   def getComponentTypeId[A <: BaseComponent](c: Class[A]): ComponentTypeId = {
-    c.getTypeName
+    c.getAnnotation(classOf[TypeId]).id()
   }
 
   def nextId(): ComponentId = {
