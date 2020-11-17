@@ -4,10 +4,11 @@ sourceCompatibility = 1.7
 sourceSets.main.scala.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../core/assets"]
 
-project.ext.mainClassName = "com.exokomodo.komodogdx.desktop.DesktopLauncher"
+project.ext.mainClassName = "com.exokomodo.komodo.desktop.Example"
 project.ext.assetsDir = new File("../core/assets")
 
 task run(dependsOn: classes, type: JavaExec) {
+    jvmArgs = ['-XstartOnFirstThread']
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -16,6 +17,7 @@ task run(dependsOn: classes, type: JavaExec) {
 }
 
 task debug(dependsOn: classes, type: JavaExec) {
+    jvmArgs = ['-XstartOnFirstThread']
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
