@@ -1,6 +1,5 @@
 apply plugin: "scala"
 
-sourceCompatibility = 1.7
 sourceSets.main.scala.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../core/assets"]
 
