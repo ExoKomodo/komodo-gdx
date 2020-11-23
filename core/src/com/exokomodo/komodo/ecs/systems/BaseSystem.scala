@@ -3,15 +3,15 @@ package com.exokomodo.komodo.ecs.systems
 import com.exokomodo.komodo.ecs.components.{BaseComponent, ComponentTypeId, getComponentTypeId}
 import com.exokomodo.komodo.ecs.entities.{Entity, EntityId}
 
-import scala.collection.immutable.HashMap
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 abstract class BaseSystem extends System {
-  protected override final var _entityToComponents: HashMap[EntityId, List[BaseComponent]] = HashMap.empty[EntityId, List[BaseComponent]]
-  protected override final var _uninitializedComponents: List[BaseComponent] = List.empty[BaseComponent]
+  protected override final val _entityToComponents: HashMap[EntityId, ListBuffer[BaseComponent]] = HashMap.empty[EntityId, ListBuffer[BaseComponent]]
+  protected override final val _uninitializedComponents: ListBuffer[BaseComponent] = ListBuffer.empty[BaseComponent]
 
-  override final def findComponentByParent[A <: BaseComponent](entity: Entity, c: Class[A]): Option[A] = {
+  override final def findComponentByParent[A <: BaseComponent](entity: Entity, c: Class[A]): Option[A] =
     findComponentByParent(entity, getComponentTypeId(c))
-  }
 
   override final def findComponentByParent[A <: BaseComponent](entity: Entity, componentTypeId: ComponentTypeId): Option[A] = {
     _entityToComponents.get(entity.id) match {
@@ -22,7 +22,7 @@ abstract class BaseSystem extends System {
 
   override def initialize(): Unit = {
     _uninitializedComponents.foreach(component => component.initialize())
-    _uninitializedComponents = List.empty[BaseComponent]
+    _uninitializedComponents.clear()
     isInitialized = true
   }
 
@@ -38,28 +38,12 @@ abstract class BaseSystem extends System {
         })
         if (missingType)
           return
-        _entityToComponents = _entityToComponents - entity.id
+        _entityToComponents -= entity.id
 
         components.foreach(component => registerComponent(component))
       }
       case None => ()
     }
-  }
-
-  protected final def _findComponentByClass[A <: BaseComponent](
-                                                                  components: List[BaseComponent],
-                                                                  c: Class[A],
-                                                                ): Option[A] = {
-    _findComponentByTypeId(components, getComponentTypeId(c))
-  }
-
-  protected final def _findComponentByTypeId[A <: BaseComponent](
-                                                                  components: List[BaseComponent],
-                                                                  typeId: ComponentTypeId,
-                                                                ): Option[A] = {
-    components.find(
-      component => getComponentTypeId(component.getClass) == typeId
-    ).asInstanceOf[Option[A]]
   }
 
   override final def registerComponent(component: BaseComponent): Boolean = {
@@ -70,17 +54,18 @@ abstract class BaseSystem extends System {
         case None => false
         case Some(parent) => {
           if (!_entityToComponents.contains(parent.id))
-            _entityToComponents += (parent.id -> List.empty[BaseComponent])
+            _entityToComponents += (parent.id -> ListBuffer.empty[BaseComponent])
 
           val components = _entityToComponents(parent.id)
-          if (components.contains(component)) false
+          if (components.contains(component))
+            false
           else {
-            _entityToComponents = _entityToComponents.updated(
+            _entityToComponents.update(
               parent.id,
-              component :: components,
+              components += component,
             )
             if (!component.isInitialized)
-              _uninitializedComponents = component :: _uninitializedComponents
+              _uninitializedComponents += component
             true
           }
         }
@@ -89,6 +74,32 @@ abstract class BaseSystem extends System {
   }
 
   override final def unregisterComponent(component: BaseComponent): Boolean = {
-    true
+    val parent = component.parent.get
+    _entityToComponents.get(parent.id) match {
+      case Some(components) => {
+        _entityToComponents.update(
+          parent.id,
+          components -= component,
+        )
+        true
+      }
+      case None => false
+    }
+  }
+
+  protected final def _findComponentByClass[A <: BaseComponent](
+                                                                 components: ListBuffer[BaseComponent],
+                                                                 c: Class[A],
+                                                               ): Option[A] = {
+    _findComponentByTypeId(components, getComponentTypeId(c))
+  }
+
+  protected final def _findComponentByTypeId[A <: BaseComponent](
+                                                                  components: ListBuffer[BaseComponent],
+                                                                  typeId: ComponentTypeId,
+                                                                ): Option[A] = {
+    components.find(
+      component => getComponentTypeId(component.getClass) == typeId
+    ).asInstanceOf[Option[A]]
   }
 }

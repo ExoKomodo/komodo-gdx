@@ -18,7 +18,6 @@ class BehaviorSystem extends BaseSystem with UpdatableSystem {
     })
   }
 
-  def _updateComponent(component: BehaviorComponent, delta: Float): Unit = {
+  def _updateComponent(component: BehaviorComponent, delta: Float): Unit =
     component.update(delta)
-  }
 }

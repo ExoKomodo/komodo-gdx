@@ -3,7 +3,8 @@ package com.exokomodo.komodo.ecs
 import com.exokomodo.komodo.ecs.components.{BaseComponent, ComponentTypeId}
 import com.exokomodo.komodo.ecs.entities.{Entity, EntityId}
 
-import scala.collection.immutable.HashMap
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 package object systems {
   type SystemId = Int
@@ -19,8 +20,8 @@ package object systems {
     val id: SystemId = nextId()
 
     protected val _registeredTypes: Set[ComponentTypeId]
-    protected var _entityToComponents: HashMap[EntityId, List[BaseComponent]]
-    protected var _uninitializedComponents: List[BaseComponent]
+    protected val _entityToComponents: HashMap[EntityId, ListBuffer[BaseComponent]]
+    protected val _uninitializedComponents: ListBuffer[BaseComponent]
 
     private var _isInitialized: Boolean = false
     def isInitialized = _isInitialized

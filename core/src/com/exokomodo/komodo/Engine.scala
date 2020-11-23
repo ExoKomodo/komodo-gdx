@@ -55,8 +55,8 @@ class Engine extends ApplicationListener {
           _componentStore += (component.id -> component)
 
           executeOnSystems((_: SystemId, system: systems.System) => {
-            system.registerComponent(component)
-            system.refreshEntityRegistration(parent)
+            if (system.registerComponent(component))
+              system.refreshEntityRegistration(parent)
           })
 
           true
@@ -69,9 +69,7 @@ class Engine extends ApplicationListener {
   def registerEntity(entity: Entity): Boolean = {
     _entityStore += (entity.id -> entity)
 
-    executeOnSystems((_: SystemId, system: systems.System) => {
-      system.refreshEntityRegistration(entity)
-    })
+    executeOnSystems((_: SystemId, system: systems.System) => system.refreshEntityRegistration(entity))
     true
   }
 
@@ -98,8 +96,8 @@ class Engine extends ApplicationListener {
 
   def unregisterComponent(component: BaseComponent): Boolean = {
     executeOnSystems((_: SystemId, system: systems.System) => {
-      system.unregisterComponent(component)
-      system.refreshEntityRegistration(component.parent.get)
+      if (system.unregisterComponent(component))
+        system.refreshEntityRegistration(component.parent.get)
     })
     true
   }
