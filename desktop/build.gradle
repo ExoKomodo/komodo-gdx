@@ -7,7 +7,12 @@ project.ext.mainClassName = "com.exokomodo.komodo.desktop.Example"
 project.ext.assetsDir = new File("../core/assets")
 
 task run(dependsOn: classes, type: JavaExec) {
-    jvmArgs = ['-XstartOnFirstThread']
+    String osName = System.getProperty("os.name")
+    if (osName.indexOf("mac") >= 0) {
+        jvmArgs = ['-XstartOnFirstThread']
+    } else {
+        jvmArgs = []
+    }
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
