@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "scala",
+            "name": "Debug Desktop",
+            "request": "launch",
+            "mainClass": "com.exokomodo.komodo.desktop.Example",
+            "args": [],
+            "jvmOptions": []
+        },
+        {
+            "type": "scala",
+            "name": "Debug Desktop (Mac)",
+            "request": "launch",
+            "mainClass": "com.exokomodo.komodo.desktop.Example",
+            "args": [],
+            "jvmOptions": ["-XstartOnFirstThread"]
+        },
+    ]
+}
