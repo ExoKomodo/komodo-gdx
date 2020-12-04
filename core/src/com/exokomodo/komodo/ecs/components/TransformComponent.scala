@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector3
 import com.exokomodo.komodo.ecs.entities.Entity
 
 object TransformComponent {
+  final val typeId = "TransformComponent"
+
   def apply(
              parent: Entity,
              position: Vector3 = Vector3.Zero,
@@ -19,7 +21,7 @@ object TransformComponent {
   }
 }
 
-@TypeId(id = "TransformComponent")
+@TypeId(id = TransformComponent.typeId)
 sealed class TransformComponent(
                           override val parent: Option[Entity],
                           var position: Vector3,

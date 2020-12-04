@@ -7,6 +7,7 @@ import com.exokomodo.komodo.ecs.components.{
   TransformComponent,
   getComponentTypeId,
 }
+import com.badlogic.gdx.graphics.g2d.Sprite
 
 object RenderSpriteSystem {
   def apply(): RenderSpriteSystem = {
@@ -16,8 +17,8 @@ object RenderSpriteSystem {
 
 class RenderSpriteSystem extends BaseSystem with DrawableSystem {
   override protected final val _registeredTypes = Set(
-    getComponentTypeId(classOf[SpriteComponent]),
-    getComponentTypeId(classOf[TransformComponent]),
+    SpriteComponent.typeId,
+    TransformComponent.typeId,
   )
 
   override def draw(): Unit = {
@@ -34,10 +35,24 @@ class RenderSpriteSystem extends BaseSystem with DrawableSystem {
   }
 
   private def _drawComponents(sprite: SpriteComponent, transform: TransformComponent): Unit = {
-    Engine.spriteBatch.get.draw(
-      sprite.texture.get,
-      transform.position.x,
-      transform.position.y,
-    )
+    if (!sprite.isReady || !transform.isReady)
+      return
+    else {
+      val internalSprite = sprite.sprite.get
+      _prepareSpriteToDraw(internalSprite, transform)
+      internalSprite.draw(Engine.spriteBatch.get)
+    }
+  }
+
+  private def _prepareSpriteToDraw(sprite: Sprite, transform: TransformComponent): Unit = {
+    val scale = transform.scale
+    sprite.setScale(scale.x, scale.y)
+    
+    // Negative so rotation is clockwise
+    val rotation = transform.rotation
+    sprite.setRotation(-transform.rotation.z)
+    
+    val position = transform.position
+    sprite.setPosition(position.x, position.y)
   }
 }

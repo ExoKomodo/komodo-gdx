@@ -21,4 +21,6 @@ abstract class BaseComponent {
     if (isInitialized) return
     isInitialized = true
   }
+
+  def isReady: Boolean = isInitialized && isEnabled
 }

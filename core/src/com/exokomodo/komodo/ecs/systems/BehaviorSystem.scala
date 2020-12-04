@@ -5,19 +5,20 @@ import com.exokomodo.komodo.ecs.components.{BehaviorComponent, getComponentTypeI
 
 class BehaviorSystem extends BaseSystem with UpdatableSystem {
   override protected final val _registeredTypes = Set(
-    getComponentTypeId(classOf[BehaviorComponent]),
+    BehaviorComponent.typeId,
   )
 
   override def update(delta: Float): Unit = {
     _entityToComponents.foreachEntry((_, components) => {
-      val behavior = _findComponentByClass(components, classOf[BehaviorComponent])
-      behavior match {
-        case Some(b) => _updateComponent(b, delta)
-        case _ => ()
-      }
+      components.foreach(component => {
+        _updateComponent(component.asInstanceOf[BehaviorComponent], delta)
+      })
     })
   }
 
   def _updateComponent(component: BehaviorComponent, delta: Float): Unit =
-    component.update(delta)
+    if (!component.isReady)
+      return
+    else
+      component.update(delta)
 }
