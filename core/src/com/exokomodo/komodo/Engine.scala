@@ -10,6 +10,7 @@ import com.exokomodo.komodo.ecs.systems
 import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, UpdatableSystem}
 
 import scala.collection.immutable.HashMap
+import com.exokomodo.komodo.input.InputManager
 
 object Engine {
   var spriteBatch: Option[SpriteBatch] = None
@@ -28,8 +29,8 @@ class Engine extends ApplicationListener {
   }
 
   def render(): Unit = {
+    InputManager.update()
     _initialize()
-
     _draw()
     _update(Gdx.graphics.getDeltaTime())
   }

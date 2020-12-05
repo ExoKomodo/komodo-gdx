@@ -15,7 +15,7 @@ object Example extends App {
 
   Game.registerSystem(new BehaviorSystem)
   Game.registerSystem(new RenderSpriteSystem)
-  Game.registerSystem(new MoveAndRotateSpriteSystem)
+  // Game.registerSystem(new MoveAndRotateSpriteSystem)
   Game.registerEntity(entity)
 
   Game.registerComponent(
@@ -32,19 +32,19 @@ object Example extends App {
       "badlogic.jpg",
     )
   )
-  Game.registerComponent(
-    VelocityComponent.apply(
-      entity,
-      new Vector3(100, 0, 0),
-    )
-  )
-  Game.registerComponent(
-    RotationComponent.apply(
-      entity,
-      new Vector3(0, 0, 90),
-    )
-  )
-  // Game.registerComponent(MoveBehavior.apply(entity))
+  // Game.registerComponent(
+  //   VelocityComponent.apply(
+  //     entity,
+  //     new Vector3(100, 0, 0),
+  //   )
+  // )
+  // Game.registerComponent(
+  //   RotationComponent.apply(
+  //     entity,
+  //     new Vector3(0, 0, 90),
+  //   )
+  // )
+  Game.registerComponent(MoveBehavior.apply(entity))
   // Game.registerComponent(RotateBehavior.apply(entity))
 
   Game.run()
