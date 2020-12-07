@@ -14,11 +14,11 @@
         },
         {
             "type": "scala",
-            "name": "Debug Desktop (Mac)",
+            "name": "Debug Editor",
             "request": "launch",
-            "mainClass": "com.exokomodo.komodo.desktop.Example",
+            "mainClass": "com.exokomodo.komodo.editor.Main",
             "args": [],
-            "jvmOptions": ["-XstartOnFirstThread"]
-        },
+            "jvmOptions": []
+        }
     ]
 }

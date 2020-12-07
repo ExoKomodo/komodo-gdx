@@ -1,18 +1,12 @@
-apply plugin: "scala"
-
-sourceSets.main.scala.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = []
+sourceSets.main.scala.srcDirs = [ "src/main" ]
 sourceSets.main.resources.srcDirs = ["../core/assets"]
 
 project.ext.mainClassName = "com.exokomodo.komodo.desktop.Example"
 project.ext.assetsDir = new File("../core/assets")
 
 task run(dependsOn: classes, type: JavaExec) {
-    String osName = System.getProperty("os.name").toLowerCase()
-    if (osName.indexOf("mac") >= 0) {
-        jvmArgs = ['-XstartOnFirstThread']
-    } else {
-        jvmArgs = []
-    }
+    jvmArgs = []
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -21,7 +15,7 @@ task run(dependsOn: classes, type: JavaExec) {
 }
 
 task debug(dependsOn: classes, type: JavaExec) {
-    jvmArgs = ['-XstartOnFirstThread']
+    jvmArgs = []
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in

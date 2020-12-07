@@ -1,7 +1,6 @@
-apply plugin: "scala"
-
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.scala.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = []
+sourceSets.main.scala.srcDirs = [ "src/main" ]
 
 eclipse.project.name = appName + "-core"
