@@ -36,7 +36,7 @@ class RenderSpriteSystem extends BaseSystem with DrawableSystem {
 
   private def _drawComponents(sprite: SpriteComponent, transform: TransformComponent): Unit = {
     if (!sprite.isReady || !transform.isReady)
-      return
+      ()
     else {
       val internalSprite = sprite.sprite.get
       _prepareSpriteToDraw(internalSprite, transform)
@@ -50,7 +50,7 @@ class RenderSpriteSystem extends BaseSystem with DrawableSystem {
     
     // Negative so rotation is clockwise
     val rotation = transform.rotation
-    sprite.setRotation(-transform.rotation.z)
+    sprite.setRotation(-rotation.z)
     
     val position = transform.position
     sprite.setPosition(position.x, position.y)

@@ -35,7 +35,16 @@ class Engine extends ApplicationListener {
     _update(Gdx.graphics.getDeltaTime())
   }
 
+  def reset(): Unit = {
+    InputManager.reset()
+    _componentStore = HashMap.empty[ComponentId, BaseComponent]
+    _entityStore = HashMap.empty[EntityId, Entity]
+    _drawSystemStore = HashMap.empty[EntityId, DrawableSystem]
+    _updateSystemStore = HashMap.empty[EntityId, UpdatableSystem]
+  }
+
   def resize(width: Int, height: Int): Unit = {
+    Gdx.gl.glViewport(0, 0, width, height)
   }
 
   def pause(): Unit = {
@@ -45,6 +54,7 @@ class Engine extends ApplicationListener {
   }
 
   def dispose(): Unit = {
+    Game.quit
   }
 
   def registerComponent(component: BaseComponent): Boolean = {

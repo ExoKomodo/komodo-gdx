@@ -1,0 +1,4 @@
+sourceSets.main.java.srcDirs = []
+sourceSets.main.scala.srcDirs = [ "src/main" ]
+
+mainClassName = "com.exokomodo.komodo.editor.Main"

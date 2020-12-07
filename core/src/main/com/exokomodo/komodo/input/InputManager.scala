@@ -205,6 +205,12 @@ object InputManager {
         })
     }
 
+    def reset(): Unit = {
+        _actionMap = HashMap.empty[Action, InputSet]
+        _inputState = HashMap.empty[Inputs, InputInfo]
+        _previousInputState = HashMap.empty[Inputs, InputInfo]
+    }
+
     def update(): Unit = {
         _previousInputState = _inputState
         _inputState = _pollInputState()
