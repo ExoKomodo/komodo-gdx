@@ -11,6 +11,7 @@ import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, U
 
 import scala.collection.immutable.HashMap
 import com.exokomodo.komodo.input.InputManager
+import com.exokomodo.komodo.ecs.systems.AsyncUpdatableSystem
 
 object Engine {
   var spriteBatch: Option[SpriteBatch] = None
@@ -21,6 +22,7 @@ class Engine extends ApplicationListener {
   private var _entityStore: HashMap[EntityId, Entity] = HashMap.empty[EntityId, Entity]
   private var _drawSystemStore: HashMap[SystemId, DrawableSystem] = HashMap.empty[EntityId, DrawableSystem]
   private var _updateSystemStore: HashMap[SystemId, UpdatableSystem] = HashMap.empty[EntityId, UpdatableSystem]
+  private var _asyncUpdateSystemStore: HashMap[SystemId, AsyncUpdatableSystem] = HashMap.empty[EntityId, AsyncUpdatableSystem]
 
   def create(): Unit = {
     Engine.spriteBatch = Some(new SpriteBatch())
@@ -41,6 +43,7 @@ class Engine extends ApplicationListener {
     _entityStore = HashMap.empty[EntityId, Entity]
     _drawSystemStore = HashMap.empty[EntityId, DrawableSystem]
     _updateSystemStore = HashMap.empty[EntityId, UpdatableSystem]
+    _asyncUpdateSystemStore = HashMap.empty[EntityId, AsyncUpdatableSystem]
   }
 
   def resize(width: Int, height: Int): Unit = {
@@ -88,12 +91,14 @@ class Engine extends ApplicationListener {
     system match {
       case drawable: DrawableSystem => _drawSystemStore += (drawable.id -> drawable)
       case updatable: UpdatableSystem => _updateSystemStore += (updatable.id -> updatable)
+      case asyncUpdatable: AsyncUpdatableSystem => _asyncUpdateSystemStore += (asyncUpdatable.id -> asyncUpdatable)
     }
     _entityStore.foreachEntry((_, entity) => system.refreshEntityRegistration(entity))
     true
   }
 
   def executeOnSystems(fn: (SystemId, systems.System) => Unit): Unit = {
+    _asyncUpdateSystemStore.foreachEntry(fn)
     _drawSystemStore.foreachEntry(fn)
     _updateSystemStore.foreachEntry(fn)
   }
@@ -132,7 +137,12 @@ class Engine extends ApplicationListener {
       case None => {
         _updateSystemStore.get(systemId) match {
           case Some(system) => unregisterSystem(system)
-          case None => false
+          case None => {
+            _asyncUpdateSystemStore.get(systemId) match {
+              case Some(system) => unregisterSystem(system)
+              case None => false
+            }
+          }
         }
       }
     }
@@ -141,6 +151,7 @@ class Engine extends ApplicationListener {
   def unregisterSystem(system: systems.System): Boolean = {
     _drawSystemStore -= system.id
     _updateSystemStore -= system.id
+    _asyncUpdateSystemStore -= system.id
     true
   }
 
@@ -149,11 +160,11 @@ class Engine extends ApplicationListener {
   }
 
   protected def _clearScreen(
-                              red: Float = 0,
-                              green: Float = 0,
-                              blue: Float = 0,
-                              alpha: Float = 1,
-                           ): Unit = {
+    red: Float = 0,
+    green: Float = 0,
+    blue: Float = 0,
+    alpha: Float = 1,
+  ): Unit = {
     Gdx.gl.glClearColor(red, green, blue, alpha)
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
   }
@@ -169,6 +180,7 @@ class Engine extends ApplicationListener {
   }
 
   private def _update(delta: Float): Unit = {
+    _asyncUpdateSystemStore.foreachEntry((_, system) => system.update())
     _updateSystemStore.foreachEntry((_, system) => system.update(delta))
   }
 }

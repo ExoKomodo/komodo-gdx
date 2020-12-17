@@ -42,4 +42,8 @@ package object systems {
   trait UpdatableSystem extends System {
     def update(delta: Float): Unit
   }
+
+  trait AsyncUpdatableSystem extends System {
+    def update(): Unit
+  }
 }

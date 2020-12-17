@@ -9,14 +9,22 @@ import com.exokomodo.komodo.ecs.systems.{BehaviorSystem, RenderSpriteSystem}
 import com.exokomodo.komodo.desktop.behaviors.RotateBehavior
 import com.exokomodo.komodo.ecs.systems.MoveAndRotateSpriteSystem
 import com.exokomodo.komodo.desktop.components.{RotationComponent, VelocityComponent}
+import com.exokomodo.komodo.ecs.systems.AsyncBehaviorSystem
+import com.exokomodo.komodo.desktop.behaviors.AsyncTestBehavior
 
 object Example extends App {
   val entity = new Entity
 
+  Game.registerSystem(new AsyncBehaviorSystem)
   Game.registerSystem(new RenderSpriteSystem)
   Game.registerSystem(new MoveAndRotateSpriteSystem)
   Game.registerEntity(entity)
 
+  Game.registerComponent(
+    AsyncTestBehavior.apply(
+      entity,
+    )
+  )
   Game.registerComponent(
     TransformComponent.apply(
       entity,
@@ -31,18 +39,18 @@ object Example extends App {
       "badlogic.jpg",
     )
   )
-   Game.registerComponent(
-     VelocityComponent.apply(
-       entity,
-       new Vector3(100, 0, 0),
-     )
-   )
-   Game.registerComponent(
-     RotationComponent.apply(
-       entity,
-       new Vector3(0, 0, 90),
-     )
-   )
+  Game.registerComponent(
+    VelocityComponent.apply(
+      entity,
+      new Vector3(100, 0, 0),
+    )
+  )
+  Game.registerComponent(
+    RotationComponent.apply(
+      entity,
+      new Vector3(0, 0, 90),
+    )
+  )
 
   Game.run()
 }
