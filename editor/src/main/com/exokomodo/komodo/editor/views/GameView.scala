@@ -29,7 +29,7 @@ class GameView extends KomodoView {
     Game.registerComponent(
       SpriteComponent.apply(
         entity,
-        "../core/assets/badlogic.jpg",
+        "./assets/img/badlogic.jpg",
       )
     )
   }
