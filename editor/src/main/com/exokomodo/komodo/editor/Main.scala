@@ -1,6 +1,6 @@
 package com.exokomodo.komodo.editor
 
 object Main extends App {
-    val app = EditorApp.apply()
+    val app = KomodoEditor.apply()
     app.run(args)
 }

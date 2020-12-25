@@ -4,13 +4,11 @@ import com.exokomodo.komodo.editor.views.MainView
 import javafx.application.Application
 import javafx.stage.Stage
 
-object EditorApp {
-    def apply(): EditorApp = {
-        new EditorApp
-    }
+object KomodoEditor {
+    def apply(): KomodoEditor = new KomodoEditor
 }
 
-class EditorApp extends Application {
+class KomodoEditor extends Application {
     private var _mainView: Option[MainView] = None
 
     def run(args: Array[String]): Unit = {
@@ -19,7 +17,7 @@ class EditorApp extends Application {
 
     def start(stage: Stage): Unit = {
         _mainView = Some(new MainView(stage))
-        _mainView.get.show
+        _mainView.get.show()
     }
 
     override def stop(): Unit = {

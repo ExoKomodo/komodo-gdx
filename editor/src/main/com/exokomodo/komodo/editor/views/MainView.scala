@@ -12,26 +12,24 @@ class MainView(
 ) extends KomodoView {
   _initialize()
 
-  private def _initialize(): Unit = {
-    val loader = new FXMLLoader(getClass().getResource(sceneXmlPath))
-    val root = loader.load[VBox]()
-        
-    val scene = new Scene(root, 300, 250)
-    scene.getStylesheets().add(
-      getClass().getResource(sceneStylesPath).toExternalForm()
-    )
-    
-    _stage.setTitle("Komodo Engine Editor")
-    _stage.setScene(scene)
+  override def show(): Unit = {
     _stage.show()
-  }
-
-  override def show: Unit = {
-    _stage.show
   }
 
   override def stop: Unit = {
     if (Game.isRunning)
       Game.quit
+  }
+
+  private def _initialize(): Unit = {
+    val root = _loadNode[VBox](getClass, _sceneXmlPath)    
+    val scene = new Scene(root, 300, 250)
+    scene.getStylesheets().add(
+      _loadStylesheet(getClass, _sceneStylesPath)
+    )
+    
+    _stage.setTitle("Komodo Engine Editor")
+    _stage.setScene(scene)
+    _stage.show()
   }
 }

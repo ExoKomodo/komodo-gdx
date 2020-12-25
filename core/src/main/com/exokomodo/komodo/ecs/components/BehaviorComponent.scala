@@ -8,8 +8,8 @@ object BehaviorComponent {
 
 @TypeId(id = BehaviorComponent.typeId)
 abstract class BehaviorComponent(
-                       override val parent: Option[Entity],
-                     ) extends BaseComponent {
+  override val parent: Option[Entity],
+) extends BaseComponent {
   override def initialize(): Unit = {
     if (isInitialized) return
 

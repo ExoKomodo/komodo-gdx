@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.Input.{Buttons, Keys}
 import com.badlogic.gdx.controllers.{Controller, Controllers}
 import com.badlogic.gdx.math.Vector2
-import scala.collection.immutable.{HashMap, Set}
+import scala.collection.immutable.{HashMap, List, Set}
 
 object InputManager {
     type Action = String
@@ -132,12 +132,12 @@ object InputManager {
             case Some(inputSet) => inputSet
             case None => Set.empty[Inputs]
         }
-        if (inputSet.contains(input)) {
-            return
-        }
-        _actionMap = _actionMap + (
-            action -> (inputSet + input)
-        )
+        if (inputSet.contains(input))
+            ()
+        else
+            _actionMap = _actionMap + (
+                action -> (inputSet + input)
+            )
     }
 
     def getAction(action: Action, isCurrent: Boolean = true): InputInfoSet = {
@@ -151,7 +151,7 @@ object InputManager {
         val x = Gdx.input.getX().toFloat
         val y = Gdx.input.getY().toFloat
         if (isCurrent)
-            new Vector2( x,y)
+            new Vector2(x, y)
         else
             new Vector2(
                 x - Gdx.input.getDeltaX(),
@@ -159,7 +159,7 @@ object InputManager {
             )
     }
 
-    def isActionJustPressed(action: String): Boolean = {
+    def isActionJustPressed(action: Action): Boolean = {
         _gdxInputCheckCommon(
             action,
             Gdx.input.isKeyJustPressed,
@@ -167,22 +167,19 @@ object InputManager {
         )
     }
     
-    def isActionJustReleased(action: String): Boolean = {
-        _inputCheckCommon(action, (input: Inputs) => {
-            (_previousInputState.get(input), _inputState.get(input)) match {
-                case (Some(previous), Some(current)) => {
-                    (previous.state, current.state) match {
-                        case (InputState.Down, InputState.Up) => return true
-                        case _ => ()
-                    }
+    def isActionJustReleased(action: Action): Boolean = {
+        _inputCheckCommon(action, (input: Inputs) => (_previousInputState.get(input), _inputState.get(input)) match {
+            case (Some(previous), Some(current)) => {
+                (previous.state, current.state) match {
+                    case (InputState.Down, InputState.Up) => true
+                    case _ => false
                 }
-                case _ => ()
             }
-            false
+            case _ => false
         })
     }
     
-    def isActionPressed(action: String): Boolean = {
+    def isActionPressed(action: Action): Boolean = {
         _gdxInputCheckCommon(
             action,
             Gdx.input.isKeyPressed,
@@ -190,18 +187,15 @@ object InputManager {
         )
     }
 
-    def isActionReleased(action: String): Boolean = {
-        _inputCheckCommon(action, (input: Inputs) => {
-            (_inputState.get(input)) match {
-                case Some(current) => {
-                    current.state match {
-                        case InputState.Up => return true
-                        case _ => ()
-                    }
+    def isActionReleased(action: Action): Boolean = {
+        _inputCheckCommon(action, (input: Inputs) => (_inputState.get(input)) match {
+            case Some(current) => {
+                current.state match {
+                    case InputState.Up => true
+                    case _ => false
                 }
-                case _ => ()
             }
-            false
+            case _ => false
         })
     }
 
@@ -213,7 +207,7 @@ object InputManager {
 
     def update(): Unit = {
         _previousInputState = _inputState
-        _inputState = _pollInputState()
+        _inputState = _pollInputState
     }
 
     private def _constructInputInfo(input: Inputs): InputInfo = {
@@ -227,7 +221,7 @@ object InputManager {
         )
     }
 
-    def _gdxInputCheckCommon(action: String, keyFn: (Int) => Boolean, mouseFn: (Int) => Boolean): Boolean = {
+    def _gdxInputCheckCommon(action: Action, keyFn: (Int) => Boolean, mouseFn: (Int) => Boolean): Boolean = {
         for (input <- InputManager.getAction(action)) {
             input match {
                 case Some(value) => {
@@ -287,7 +281,7 @@ object InputManager {
         }
     }
 
-    def _inputCheckCommon(action: String, fn: (Inputs) => Boolean): Boolean = {
+    def _inputCheckCommon(action: Action, fn: (Inputs) => Boolean): Boolean = {
         for (input <- InputManager.getAction(action)) {
             input match {
                 case Some(value) => {
@@ -300,9 +294,7 @@ object InputManager {
         false
     }
 
-    private def _pollInputState(): InputInfoMap = {
-        HashMap.from(
-            _inputsToPoll.map(input => (input, _constructInputInfo(input)))
-        )
-    }
+    private def _pollInputState: InputInfoMap = HashMap.from(
+        _inputsToPoll.map(input => (input, _constructInputInfo(input)))
+    )
 }

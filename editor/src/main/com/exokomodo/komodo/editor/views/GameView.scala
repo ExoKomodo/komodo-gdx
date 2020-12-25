@@ -34,7 +34,7 @@ class GameView extends KomodoView {
     )
   }
 
-  def show: Unit = {
+  def show(): Unit = {
     Game.runInEditor()
   }
 

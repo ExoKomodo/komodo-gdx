@@ -31,11 +31,11 @@ object SpriteComponent extends BaseComponent {
 
 @TypeId(id = SpriteComponent.typeId)
 sealed class SpriteComponent(
-                       override val parent: Option[Entity],
-                       val texturePath: Option[String],
-                       var texture: Option[Texture],
-                       var sprite: Option[Sprite] = None,
-                     ) extends BaseComponent {
+  override val parent: Option[Entity],
+  val texturePath: Option[String],
+  var texture: Option[Texture],
+  var sprite: Option[Sprite] = None,
+) extends BaseComponent {
   
   @throws(classOf[FileNotFoundException])
   override def initialize(): Unit = {

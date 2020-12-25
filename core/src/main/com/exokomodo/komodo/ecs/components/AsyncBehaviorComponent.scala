@@ -23,19 +23,13 @@ abstract class AsyncBehaviorComponent(
 
   final def execute(): Unit = {
     _state = ExecutionState.Running
-    new Thread(
-      new Runnable {
-        def run(): Unit = {
-          _produce()
-          Gdx.app.postRunnable(new Runnable {
-            def run(): Unit = {
-              _consume()
-              _state = ExecutionState.Finished
-            }
-          })
-        }
-      }
-    ).start()
+    new Thread(() => {
+      _produce()
+      Gdx.app.postRunnable(() => {
+        _consume()
+        _state = ExecutionState.Finished
+      })
+    }).start()
   }
 
   override def isReady: Boolean = {

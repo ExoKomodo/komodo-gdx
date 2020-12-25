@@ -37,12 +37,10 @@ class MainController extends KomodoController {
   
   def onStartPress(event: ActionEvent): Unit = {
     if (!Game.isRunning)
-      Platform.runLater(new Runnable {
-          override def run(): Unit = {
-              val view = new GameView()
-              MainController.gameView = Some(view)
-              view.show
-          }
+      Platform.runLater(() => {
+        val view = new GameView()
+        MainController.gameView = Some(view)
+        view.show()
       })
   }
 }
