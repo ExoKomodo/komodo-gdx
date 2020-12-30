@@ -36,7 +36,7 @@ object Example extends App {
   Game.registerComponent(
     SpriteComponent.apply(
       entity,
-      "badlogic.jpg",
+      "./assets/img/badlogic.jpg",
     )
   )
   Game.registerComponent(
