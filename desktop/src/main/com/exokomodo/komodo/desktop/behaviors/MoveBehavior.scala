@@ -30,8 +30,6 @@ class MoveBehavior(
         InputManager.addInputMapping("right", Inputs.KeyRight)
     }
 
-    override def update(delta: Float): Unit = {
-        if (InputManager.isActionPressed("right"))
-        _transform.get.position.x += 100 * delta
-    }
+    override def update(delta: Float): Unit =
+        if (InputManager.isActionPressed("right")) _transform.get.translate(100 * delta)
 }
