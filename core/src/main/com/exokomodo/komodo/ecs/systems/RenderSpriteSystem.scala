@@ -34,15 +34,12 @@ class RenderSpriteSystem extends BaseSystem with DrawableSystem {
     Engine.spriteBatch.get.end()
   }
 
-  private def _drawComponents(sprite: SpriteComponent, transform: TransformComponent): Unit = {
-    if (!sprite.isReady || !transform.isReady)
-      ()
-    else {
+  private def _drawComponents(sprite: SpriteComponent, transform: TransformComponent): Unit =
+    if (sprite.isReady && transform.isReady) {
       val internalSprite = sprite.sprite.get
       _prepareSpriteToDraw(internalSprite, transform)
       internalSprite.draw(Engine.spriteBatch.get)
     }
-  }
 
   private def _prepareSpriteToDraw(sprite: Sprite, transform: TransformComponent): Unit = {
     val scale = transform.scale

@@ -4,6 +4,7 @@ import com.exokomodo.komodo.ecs.components.{BehaviorComponent, getComponentTypeI
 import com.exokomodo.komodo.desktop.components.{RotationComponent, VelocityComponent}
 import com.exokomodo.komodo.ecs.components.SpriteComponent
 import com.exokomodo.komodo.ecs.components.TransformComponent
+import com.exokomodo.komodo.lib.Vector3
 
 
 class MoveAndRotateSpriteSystem extends BaseSystem with UpdatableSystem {
@@ -26,19 +27,25 @@ class MoveAndRotateSpriteSystem extends BaseSystem with UpdatableSystem {
     })
   }
 
-  def _moveAndRotate(t: TransformComponent, v: VelocityComponent, r: RotationComponent, delta: Float): Unit = {
+  def _moveAndRotate(
+    transform: TransformComponent,
+    velocity: VelocityComponent,
+    rotation: RotationComponent,
+    delta: Float,
+  ): Unit = {
     if (
-      !t.isReady
-      || !v.isReady
-      || !r.isReady
+      !transform.isReady
+      || !velocity.isReady
+      || !rotation.isReady
     )
       return
     else {
-      val movement = v.velocity.cpy().scl(delta)
-      t.position.add(movement)
-      
-      val rotation = r.rotation.cpy().scl(delta)
-      t.rotation.add(rotation)
+      transform.translate(
+        velocity.velocity.scale(delta)
+      )
+      transform.rotate(
+        Vector3.apply(0, 0, rotation.rotation * delta)
+      )
     }
   }
 }

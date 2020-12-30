@@ -1,6 +1,5 @@
 package com.exokomodo.komodo.desktop
 
-import com.badlogic.gdx.math.Vector3
 import com.exokomodo.komodo.Game
 import com.exokomodo.komodo.desktop.behaviors.MoveBehavior
 import com.exokomodo.komodo.ecs.components.{SpriteComponent, TransformComponent}
@@ -11,6 +10,7 @@ import com.exokomodo.komodo.ecs.systems.MoveAndRotateSpriteSystem
 import com.exokomodo.komodo.desktop.components.{RotationComponent, VelocityComponent}
 import com.exokomodo.komodo.ecs.systems.AsyncBehaviorSystem
 import com.exokomodo.komodo.desktop.behaviors.AsyncTestBehavior
+import com.exokomodo.komodo.lib.Vector3
 
 object Example extends App {
   val entity = new Entity
@@ -28,9 +28,9 @@ object Example extends App {
   Game.registerComponent(
     TransformComponent.apply(
       entity,
-      position = new Vector3(50, 50, 0),
-      rotation = new Vector3(0, 0, 0),
-      scale = new Vector3(1, 1, 0),
+      position = Vector3.apply(50, 50, 0),
+      rotation = Vector3.apply(0, 0, 0),
+      scale = Vector3.apply(1, 1, 0),
     )
   )
   Game.registerComponent(
@@ -42,13 +42,13 @@ object Example extends App {
   Game.registerComponent(
     VelocityComponent.apply(
       entity,
-      new Vector3(100, 0, 0),
+      Vector3.apply(100, 0, 0),
     )
   )
   Game.registerComponent(
     RotationComponent.apply(
       entity,
-      new Vector3(0, 0, 90),
+      90,
     )
   )
 

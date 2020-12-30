@@ -2,7 +2,6 @@ package com.exokomodo.komodo.ecs.systems
 
 import com.exokomodo.komodo.ecs.components.{AsyncBehaviorComponent, getComponentTypeId}
 
-
 class AsyncBehaviorSystem extends BaseSystem with AsyncUpdatableSystem {
   override protected final val _registeredTypes = Set(
     AsyncBehaviorComponent.typeId,
@@ -17,8 +16,5 @@ class AsyncBehaviorSystem extends BaseSystem with AsyncUpdatableSystem {
   }
 
   def _updateComponent(component: AsyncBehaviorComponent): Unit =
-    if (!component.isReady)
-      return
-    else
-      component.execute()
+    if (component.isReady) component.execute()
 }
