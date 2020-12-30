@@ -7,11 +7,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.exokomodo.komodo.ecs.components.{BaseComponent, ComponentId}
 import com.exokomodo.komodo.ecs.entities.{Entity, EntityId}
 import com.exokomodo.komodo.ecs.systems
-import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, UpdatableSystem}
+import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, AsyncUpdatableSystem, UpdatableSystem}
 
 import scala.collection.immutable.HashMap
 import com.exokomodo.komodo.input.InputManager
-import com.exokomodo.komodo.ecs.systems.AsyncUpdatableSystem
 
 object Engine {
   var spriteBatch: Option[SpriteBatch] = None
@@ -103,43 +102,43 @@ class Engine extends ApplicationListener {
     _updateSystemStore.foreachEntry(fn)
   }
 
-  def unregisterComponent(componentId: ComponentId): Boolean = {
+  def deregisterComponent(componentId: ComponentId): Boolean = {
     _componentStore.get(componentId) match {
-      case Some(component) => unregisterComponent(component)
+      case Some(component) => deregisterComponent(component)
       case None => false
     }
   }
 
-  def unregisterComponent(component: BaseComponent): Boolean = {
+  def deregisterComponent(component: BaseComponent): Boolean = {
     executeOnSystems((_: SystemId, system: systems.System) => {
-      if (system.unregisterComponent(component))
+      if (system.deregisterComponent(component))
         system.refreshEntityRegistration(component.parent.get)
     })
     true
   }
 
-  def unregisterEntity(entityId: EntityId): Boolean = {
+  def deregisterEntity(entityId: EntityId): Boolean = {
     _entityStore.get(entityId) match {
-      case Some(entity) => unregisterEntity(entity)
+      case Some(entity) => deregisterEntity(entity)
       case None => false
     }
   }
 
-  def unregisterEntity(entity: Entity): Boolean = {
+  def deregisterEntity(entity: Entity): Boolean = {
     val components = for ((_, component) <- _componentStore if component.parent.get.id == entity.id) yield component
-    components.foreach(component => unregisterComponent(component))
+    components.foreach(component => deregisterComponent(component))
     true
   }
 
-  def unregisterSystem(systemId: SystemId): Boolean = {
+  def deregisterSystem(systemId: SystemId): Boolean = {
     _drawSystemStore.get(systemId) match {
-      case Some(system) => unregisterSystem(system)
+      case Some(system) => deregisterSystem(system)
       case None => {
         _updateSystemStore.get(systemId) match {
-          case Some(system) => unregisterSystem(system)
+          case Some(system) => deregisterSystem(system)
           case None => {
             _asyncUpdateSystemStore.get(systemId) match {
-              case Some(system) => unregisterSystem(system)
+              case Some(system) => deregisterSystem(system)
               case None => false
             }
           }
@@ -148,7 +147,7 @@ class Engine extends ApplicationListener {
     }
   }
 
-  def unregisterSystem(system: systems.System): Boolean = {
+  def deregisterSystem(system: systems.System): Boolean = {
     _drawSystemStore -= system.id
     _updateSystemStore -= system.id
     _asyncUpdateSystemStore -= system.id

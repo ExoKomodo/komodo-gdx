@@ -15,12 +15,14 @@ abstract class BaseComponent {
 
   private var _parent: Option[Entity] = None
   def parent: Option[Entity] = _parent
-  def parent_=(p: Entity): Unit = { _parent = Some(p) }
+  def parent_=(p: Option[Entity]): Unit = { _parent = p }
 
   def initialize(): Unit = {
-    if (isInitialized) return
-    isInitialized = true
+    if (!isInitialized) isInitialized = true
   }
 
-  def isReady: Boolean = isInitialized && isEnabled
+  def isReady: Boolean = (isInitialized, isEnabled, parent) match {
+    case (true, true, Some(_)) => true
+    case _ => false
+  }
 }

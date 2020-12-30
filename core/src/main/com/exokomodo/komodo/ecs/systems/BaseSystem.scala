@@ -73,7 +73,7 @@ abstract class BaseSystem extends System {
     }
   }
 
-  override final def unregisterComponent(component: BaseComponent): Boolean = {
+  override final def deregisterComponent(component: BaseComponent): Boolean = {
     val parent = component.parent.get
     _entityToComponents.get(parent.id) match {
       case Some(components) => {
@@ -81,6 +81,7 @@ abstract class BaseSystem extends System {
           parent.id,
           components -= component,
         )
+        component.parent = None
         true
       }
       case None => false
@@ -88,16 +89,16 @@ abstract class BaseSystem extends System {
   }
 
   protected final def _findComponentByClass[A <: BaseComponent](
-                                                                 components: ListBuffer[BaseComponent],
-                                                                 c: Class[A],
-                                                               ): Option[A] = {
+    components: ListBuffer[BaseComponent],
+    c: Class[A],
+  ): Option[A] = {
     _findComponentByTypeId(components, getComponentTypeId(c))
   }
 
   protected final def _findComponentByTypeId[A <: BaseComponent](
-                                                                  components: ListBuffer[BaseComponent],
-                                                                  typeId: ComponentTypeId,
-                                                                ): Option[A] = {
+    components: ListBuffer[BaseComponent],
+    typeId: ComponentTypeId,
+  ): Option[A] = {
     components.find(
       component => getComponentTypeId(component.getClass) == typeId
     ).asInstanceOf[Option[A]]

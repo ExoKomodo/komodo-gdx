@@ -32,7 +32,7 @@ package object systems {
     def initialize(): Unit
     def refreshEntityRegistration(entity: Entity): Unit
     def registerComponent(component: BaseComponent): Boolean
-    def unregisterComponent(component: BaseComponent): Boolean
+    def deregisterComponent(component: BaseComponent): Boolean
   }
 
   trait DrawableSystem extends System {
