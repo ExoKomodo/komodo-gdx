@@ -11,53 +11,19 @@ import com.exokomodo.komodo.ecs.systems.{BaseSystem, DrawableSystem, SystemId, A
 
 import scala.collection.immutable.HashMap
 import com.exokomodo.komodo.input.InputManager
+import com.badlogic.gdx.InputProcessor
+import com.exokomodo.komodo.lib.events.{EventId, KeyDownEvent}
 
 object Engine {
   var spriteBatch: Option[SpriteBatch] = None
 }
 
-class Engine extends ApplicationListener {
+class Engine extends ApplicationListener with InputProcessor {
   private var _componentStore: HashMap[ComponentId, BaseComponent] = HashMap.empty[ComponentId, BaseComponent]
   private var _entityStore: HashMap[EntityId, Entity] = HashMap.empty[EntityId, Entity]
   private var _drawSystemStore: HashMap[SystemId, DrawableSystem] = HashMap.empty[EntityId, DrawableSystem]
   private var _updateSystemStore: HashMap[SystemId, UpdatableSystem] = HashMap.empty[EntityId, UpdatableSystem]
   private var _asyncUpdateSystemStore: HashMap[SystemId, AsyncUpdatableSystem] = HashMap.empty[EntityId, AsyncUpdatableSystem]
-
-  def create(): Unit = {
-    Engine.spriteBatch = Some(new SpriteBatch())
-
-    _initialize()
-  }
-
-  def render(): Unit = {
-    InputManager.update()
-    _initialize()
-    _draw()
-    _update(Gdx.graphics.getDeltaTime())
-  }
-
-  def reset(): Unit = {
-    InputManager.reset()
-    _componentStore = HashMap.empty[ComponentId, BaseComponent]
-    _entityStore = HashMap.empty[EntityId, Entity]
-    _drawSystemStore = HashMap.empty[EntityId, DrawableSystem]
-    _updateSystemStore = HashMap.empty[EntityId, UpdatableSystem]
-    _asyncUpdateSystemStore = HashMap.empty[EntityId, AsyncUpdatableSystem]
-  }
-
-  def resize(width: Int, height: Int): Unit = {
-    Gdx.gl.glViewport(0, 0, width, height)
-  }
-
-  def pause(): Unit = {
-  }
-
-  def resume(): Unit = {
-  }
-
-  def dispose(): Unit = {
-    Game.quit
-  }
 
   def registerComponent(component: BaseComponent): Boolean = {
     if (_componentStore.contains(component.id))
@@ -182,4 +148,72 @@ class Engine extends ApplicationListener {
     _asyncUpdateSystemStore.foreachEntry((_, system) => system.update())
     _updateSystemStore.foreachEntry((_, system) => system.update(delta))
   }
+
+  /***********************/
+  /* ApplicationListener */
+  /***********************/
+
+  def create(): Unit = {
+    Engine.spriteBatch = Some(new SpriteBatch())
+
+    _initialize()
+  }
+
+  def render(): Unit = {
+    InputManager.update()
+    _initialize()
+    _draw()
+    _update(Gdx.graphics.getDeltaTime())
+  }
+
+  def reset(): Unit = {
+    InputManager.reset()
+    _componentStore = HashMap.empty[ComponentId, BaseComponent]
+    _entityStore = HashMap.empty[EntityId, Entity]
+    _drawSystemStore = HashMap.empty[EntityId, DrawableSystem]
+    _updateSystemStore = HashMap.empty[EntityId, UpdatableSystem]
+    _asyncUpdateSystemStore = HashMap.empty[EntityId, AsyncUpdatableSystem]
+  }
+
+  def resize(width: Int, height: Int): Unit = {
+    Gdx.gl.glViewport(0, 0, width, height)
+  }
+
+  def pause(): Unit = {
+  }
+
+  def resume(): Unit = {
+  }
+
+  def dispose(): Unit = {
+    Game.quit
+  }
+
+  /******************/
+  /* InputProcessor */
+  /******************/
+
+  private var _keyDownEvents: HashMap[EventId, KeyDownEvent] = HashMap.empty[EventId, KeyDownEvent]
+  def registerKeyDownEvent(event: KeyDownEvent): Unit = _keyDownEvents += (event.id -> event)
+  def deregisterKeyDownEvent(event: KeyDownEvent): Unit = deregisterKeyDownEvent(event.id)
+  def deregisterKeyDownEvent(eventId: EventId): Unit = _keyDownEvents -= eventId
+	def keyDown(keyCode: Int): Boolean = {
+    var handled = false
+    _keyDownEvents.foreachEntry((_, event) => if (event.handle(keyCode)) handled = true)
+    handled
+  }
+
+	def keyUp(keyCode: Int): Boolean = false
+
+	def keyTyped(character: Char): Boolean = false
+
+	def touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean = false
+
+	def touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean = false
+
+	def touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean = false
+
+	def mouseMoved(screenX: Int, screenY: Int): Boolean = false
+
+	def scrolled(amountX: Float, amountY: Float): Boolean = false
 }
